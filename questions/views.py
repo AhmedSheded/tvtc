@@ -1,10 +1,25 @@
-from django.shortcuts import render
+import json
+from .gpt import chatgpt
+from django.views.decorators.csrf import csrf_exempt
 from .serializers import CategorySerializer, QuestionSerializer
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Category, Question
+# from .gpt import chatgpt
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.http import JsonResponse
 # Create your views here.
+
+@csrf_exempt
+def ai(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        question = data.get('question', '')
+        answer = chatgpt(question)
+        return JsonResponse({'answer': answer})
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
 
 
 class CategoryAPIView(APIView):
